@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeRide SA - Scholar Transport Driver App</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1a1a2e; }
+        ::-webkit-scrollbar-thumb { background: #e94560; border-radius: 10px; }
+        
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+        .glass-light { background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); }
+        
+        .gradient-primary { background: linear-gradient(135deg, #e94560, #0f3460); }
+        .gradient-success { background: linear-gradient(135deg, #00b894, #00cec9); }
+        .gradient-warning { background: linear-gradient(135deg, #fdcb6e, #e17055); }
+        .gradient-danger { background: linear-gradient(135deg, #e94560, #d63031); }
+        .gradient-info { background: linear-gradient(135deg, #0f3460, #533483); }
+        
+        .text-gradient { background: linear-gradient(135deg, #e94560, #533483); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(233,69,96,0.15); }
+        
+        .sidebar-link { transition: all 0.2s ease; }
+        .sidebar-link:hover, .sidebar-link.active { background: rgba(233,69,96,0.15); border-left: 3px solid #e94560; }
+        
+        .pulse-dot { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+        
+        .slide-in { animation: slideIn 0.4s ease-out; }
+        @keyframes slideIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        
+        .star-rating .star { cursor: pointer; transition: all 0.2s; }
+        .star-rating .star:hover, .star-rating .star.active { color: #fdcb6e; transform: scale(1.2); }
+        
+        .progress-ring { transform: rotate(-90deg); }
+        
+        .flag-sa { background: linear-gradient(180deg, #007749 0%, #007749 33%, #FFB81C 33%, #FFB81C 40%, #FFFFFF 40%, #FFFFFF 47%, #DE3831 47%, #DE3831 53%, #FFFFFF 53%, #FFFFFF 60%, #002395 60%, #002395 67%, #000000 67%, #000000 100%); }
+        
+        .tab-active { border-bottom: 3px solid #e94560; color: #e94560; }
+        
+        .modal-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
+        
+        .badge-bounce { animation: badgeBounce 0.6s ease; }
+        @keyframes badgeBounce { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+        
+        .status-paid { border-left: 4px solid #00b894; }
+        .status-partial { border-left: 4px solid #fdcb6e; }
+        .status-owing { border-left: 4px solid #e94560; }
+        
+        input, select, textarea {
+            background: rgba(255,255,255,0.05) !important;
+            border: 1px solid rgba(255,255,255,0.15) !important;
+            color: white !important;
+            outline: none;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #e94560 !important;
+            box-shadow: 0 0 0 3px rgba(233,69,96,0.2) !important;
+        }
+        
+        .notification-bell { position: relative; }
+        .notification-bell .count {
+            position: absolute; top: -8px; right: -8px;
+            background: #e94560; color: white; font-size: 10px;
+            width: 18px; height: 18px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); position: fixed; z-index: 50; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0 !important; }
+        }
+    </style>
+</head>
+<body class="bg-[#0a0a1a] text-white min-h-screen">
+
+    <!-- Splash Screen -->
+    <div id="splashScreen" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#0a0a1a]" style="transition: opacity 0.5s">
+        <div class="text-center">
+            <div class="w-24 h-24 mx-auto mb-6 rounded-2xl gradient-primary flex items-center justify-center shadow-2xl" style="animation: pulse 1.5s infinite">
+                <i class="fas fa-shuttle-van text-4xl text-white"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gradient mb-2">SafeRide SA</h1>
+            <p class="text-gray-400 text-sm">Scholar Transport Management</p>
+            <div class="mt-6 flex justify-center gap-1">
+                <div class="w-2 h-2 rounded-full bg-[#e94560]" style="animation: pulse 1s infinite 0s"></div>
+                <div class="w-2 h-2 rounded-full bg-[#e94560]" style="animation: pulse 1s infinite 0.2s"></div>
+                <div class="w-2 h-2 rounded-full bg-[#e94560]" style="animation: pulse 1s infinite 0.4s"></div>
+            </div>
+            <div class="mt-4 flex justify-center gap-1">
+                <div class="w-6 h-1 rounded bg-green-600"></div>
+                <div class="w-6 h-1 rounded bg-yellow-400"></div>
+                <div class="w-6 h-1 rounded bg-red-500"></div>
+                <div class="w-6 h-1 rounded bg-blue-600"></div>
+                <div class="w-6 h-1 rounded bg-black"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Header -->
+    <div class="md:hidden fixed top-0 left-0 right-0 z-40 glass px-4 py-3 flex items-center justify-between">
+        <button onclick="toggleSidebar()" class="text-xl"><i class="fas fa-bars"></i></button>
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
+                <i class="fas fa-shuttle-van text-sm"></i>
+            </div>
+            <span class="font-bold text-sm">SafeRide SA</span>
+        </div>
+        <div class="notification-bell cursor-pointer" onclick="showNotifications()">
+            <i class="fas fa-bell text-lg"></i>
+            <span class="count badge-bounce">3</span>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar fixed left-0 top-0 bottom-0 w-64 bg-[#0f0f23] border-r border-white/5 z-50 transition-transform duration-300 md:translate-x-0">
+        <div class="p-6">
+            <!-- Logo -->
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
+                    <i class="fas fa-shuttle-van text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg">SafeRide SA</h1>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest">Driver Dashboard</p>
+                </div>
+            </div>
+
+            <!-- Driver Quick Profile -->
+            <div class="glass rounded-xl p-3 mb-6 flex items-center gap-3">
+                <img src="https://images.pexels.com/photos/29221981/pexels-photo-29221981.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" 
+                     class="w-10 h-10 rounded-full object-cover border-2 border-[#e94560]" alt="Driver">
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-sm truncate">Thabo Molefe</p>
+                    <p class="text-[10px] text-green-400 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-400 pulse-dot"></span> Online
+                    </p>
+                </div>
+                <div class="text-yellow-400 text-xs font-bold flex items-center gap-1">
+                    <i class="fas fa-star text-[10px]"></i> 4.8
+                </div>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="space-y-1">
+                <a onclick="showPage('dashboard')" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm" id="nav-dashboard">
+                    <i class="fas fa-th-large w-5 text-center text-[#e94560]"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a onclick="showPage('payments')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm" id="nav-payments">
+                    <i class="fas fa-money-bill-wave w-5 text-center text-green-400"></i>
+                    <span>Payments</span>
+                    <span class="ml-auto bg-red-500/20 text-red-400 text-[10px] font-bold px-2 py-0.5 rounded-full">3</span>
+                </a>
+                <a onclick="showPage('scholars')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm" id="nav-scholars">
+                    <i class="fas fa-user-graduate w-5 text-center text-blue-400"></i>
+                    <span>Scholars</span>
+                </a>
+                <a onclick="showPage('parents')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm" id="nav-parents">
+                    <i class="fas fa-users w-5 text-center text-purple-400"></i>
+                    <span>Parents</span>
+                </a>
+                <a onclick="showPage('vehicle')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm" id="nav-vehicle">
+                    <i class="fas fa-car w-5 text-center text-yellow-400"></i>
+                    <span>Vehicle Info</span>
+                </a>
+                <a onclick="showPage('ratings')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm" id="nav-ratings">
+                    <i class="fas fa-star w-5 text-center text-yellow-400"></i>
+                    <span>Ratings</span>
+                </a>
+                <a onclick="showPage('trips')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm" id="nav-trips">
+                    <i class="fas fa-route w-5 text-center text-cyan-400"></i>
+                    <span>Trip Log</span>
+                </a>
+                <a onclick="showPage('profile')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm" id="nav-profile">
+                    <i class="fas fa-id-card w-5 text-center text-orange-400"></i>
+                    <span>Driver Profile</span>
+                </a>
+                <a onclick="showPage('settings')" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm" id="nav-settings">
+                    <i class="fas fa-cog w-5 text-center text-gray-400"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Bottom Section -->
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-white/5">
+            <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                <div class="flex gap-0.5">
+                    <div class="w-4 h-1 rounded bg-green-600"></div>
+                    <div class="w-4 h-1 rounded bg-yellow-400"></div>
+                    <div class="w-4 h-1 rounded bg-red-500"></div>
+                    <div class="w-4 h-1 rounded bg-blue-600"></div>
+                </div>
+                <span>Proudly South African</span>
+            </div>
+            <p class="text-[10px] text-gray-600">v2.1.0 • NRCS Compliant</p>
+        </div>
+    </aside>
+
+    <!-- Mobile Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <main class="md:ml-64 min-h-screen pt-16 md:pt-0">
+        
+        <!-- Top Bar (Desktop) -->
+        <div class="hidden md:flex items-center justify-between px-8 py-4 border-b border-white/5 glass sticky top-0 z-30">
+            <div>
+                <h2 class="text-lg font-bold" id="pageTitle">Dashboard</h2>
+                <p class="text-xs text-gray-500" id="pageSubtitle">Welcome back, Thabo! Here's your overview.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <input type="text" placeholder="Search..." class="rounded-lg px-4 py-2 text-sm w-64 pr-10">
+                    <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                </div>
+                <div class="notification-bell cursor-pointer p-2" onclick="showNotifications()">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span class="count badge-bounce">3</span>
+                </div>
+                <img src="https://images.pexels.com/photos/29221981/pexels-photo-29221981.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" 
+                     class="w-9 h-9 rounded-full object-cover border-2 border-[#e94560] cursor-pointer" onclick="showPage('profile')">
+            </div>
+        </div>
+
+        <!-- Pages Container -->
+        <div class="p-4 md:p-8">
+            
+            <!-- ===== DASHBOARD PAGE ===== -->
+            <div id="page-dashboard" class="page slide-in">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="glass rounded-2xl p-4 card-hover">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded-xl gradient-info flex items-center justify-center">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <span class="text-green-400 text-xs font-medium"><i class="fas fa-arrow-up"></i> +2</span>
+                        </div>
+                        <p class="text-2xl font-bold">18</p>
+                        <p class="text-xs text-gray-500">Total Scholars</p>
+                    </div>
+                    <div class="glass rounded-2xl p-4 card-hover">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded-xl gradient-success flex items-center justify-center">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <span class="text-green-400 text-xs font-medium">83%</span>
+                        </div>
+                        <p class="text-2xl font-bold">15</p>
+                        <p class="text-xs text-gray-500">Paid Up</p>
+                    </div>
+                    <div class="glass rounded-2xl p-4 card-hover">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded-xl gradient-danger flex items-center justify-center">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <span class="text-red-400 text-xs font-medium">Urgent</span>
+                        </div>
+                        <p class="text-2xl font-bold">3</p>
+                        <p class="text-xs text-gray-500">Still Owing</p>
+                    </div>
+                    <div class="glass rounded-2xl p-4 card-hover">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded-xl gradient-warning flex items-center justify-center">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <span class="text-yellow-400 text-xs font-medium">June</span>
+                        </div>
+                        <p class="text-2xl font-bold">R12,600</p>
+                        <p class="text-xs text-gray-500">Monthly Income</p>
+                    </div>
+                </div>
+
+                <!-- Middle Row -->
+                <div class="grid md:grid-cols-3 gap-6 mb-6">
+                    <!-- Revenue Chart Area -->
+                    <div class="md:col-span-2 glass rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-bold">Payment Overview</h3>
+                            <select class="rounded-lg px-3 py-1 text-xs">
+                                <option>This Month</option>
+                                <option>Last Month</option>
+                                <option>3 Months</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-6 gap-2 items-end h-48 mb-4" id="paymentChart">
+                            <!-- Chart bars generated by JS -->
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
+                        </div>
+                        <div class="flex items-center gap-6 mt-4 text-xs">
+                            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-400"></span>Received</span>
+                            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-400"></span>Outstanding</span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="glass rounded-2xl p-6">
+                        <h3 class="font-bold mb-4">Quick Actions</h3>
+                        <div class="space-y-3">
+                            <button onclick="showPage('payments')" class="w-full flex items-center gap-3 glass-light rounded-xl p-3 hover:bg-white/10 transition text-sm text-left">
+                                <div class="w-9 h-9 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Record Payment</p>
+                                    <p class="text-[10px] text-gray-500">Log a parent payment</p>
+                                </div>
+                            </button>
+                            <button onclick="showAddScholarModal()" class="w-full flex items-center gap-3 glass-light rounded-xl p-3 hover:bg-white/10 transition text-sm text-left">
+                                <div class="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Add Scholar</p>
+                                    <p class="text-[10px] text-gray-500">Register new learner</p>
+                                </div>
+                            </button>
+                            <button onclick="showPage('trips')" class="w-full flex items-center gap-3 glass-light rounded-xl p-3 hover:bg-white/10 transition text-sm text-left">
+                                <div class="w-9 h-9 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+                                    <i class="fas fa-play-circle"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Start Trip</p>
+                                    <p class="text-[10px] text-gray-500">Begin morning route</p>
+                                </div>
+                            </button>
+                            <button onclick="sendReminders()" class="w-full flex items-center gap-3 glass-light rounded-xl p-3 hover:bg-white/10 transition text-sm text-left">
+                                <div class="w-9 h-9 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-400">
+                                    <i class="fas fa-paper-plane"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Send Reminders</p>
+                                    <p class="text-[10px] text-gray-500">Notify owing parents</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Row -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Recent Payments -->
+                    <div class="glass rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold">Recent Payments</h3>
+                            <a onclick="showPage('payments')" class="text-[#e94560] text-xs cursor-pointer hover:underline">View All</a>
+                        </div>
+                        <div class="space-y-3" id="recentPaymentsList">
+                            <!-- Generated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Owing Parents Alert -->
+                    <div class="glass rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-red-500 pulse-dot"></span>
+                                Owing Parents
+                            </h3>
+                            <span class="text-red-400 text-xs font-bold">R3,200 total</span>
+                        </div>
+                        <div class="space-y-3" id="owingParentsList">
+                            <!-- Generated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Route Banner -->
+                <div class="mt-6 gradient-primary rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between">
+                    <div class="flex items-center gap-4 mb-4 md:mb-0">
+                        <div class="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
+                            <i class="fas fa-route text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">Morning Route - Soweto Circuit</h3>
+                            <p class="text-white/70 text-sm">18 scholars • 12 stops • Est. 45 mins</p>
+                        </div>
+                    </div>
+                    <button onclick="startTrip()" class="bg-white text-[#e94560] font-bold px-6 py-3 rounded-xl hover:bg-white/90 transition flex items-center gap-2">
+                        <i class="fas fa-play"></i> Start Route
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== PAYMENTS PAGE ===== -->
+            <div id="page-payments" class="page hidden slide-in">
+                <!-- Payment Summary Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="glass rounded-2xl p-4 status-paid">
+                        <p class="text-xs text-gray-500 mb-1">Fully Paid</p>
+                        <p class="text-xl font-bold text-green-400">12</p>
+                        <p class="text-xs text-gray-600">R10,800</p>
+                    </div>
+                    <div class="glass rounded-2xl p-4 status-partial">
+                        <p class="text-xs text-gray-500 mb-1">Partial Payment</p>
+                        <p class="text-xl font-bold text-yellow-400">3</p>
+                        <p class="text-xs text-gray-600">R1,800</p>
+                    </div>
+                    <div class="glass rounded-2xl p-4 status-owing">
+                        <p class="text-xs text-gray-500 mb-1">Not Paid</p>
+                        <p class="text-xl font-bold text-red-400">3</p>
+                        <p class="text-xs text-gray-600">R0</p>
+                    </div>
+                    <div class="glass rounded-2xl p-4">
+                        <p class="text-xs text-gray-500 mb-1">Total Expected</p>
+                        <p class="text-xl font-bold">R16,200</p>
+                        <p class="text-xs text-gray-600">R900/scholar</p>
+                    </div>
+                </div>
+
+                <!-- Payment Filter & Search -->
+                <div class="glass rounded-2xl p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
+                    <div class="relative flex-1 w-full">
+                        <input type="text" placeholder="Search parent or scholar..." class="w-full rounded-lg px-4 py-2 text-sm pl-10" id="paymentSearch" oninput="filterPayments()">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                    </div>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <button onclick="filterPaymentStatus('all')" class="payment-filter-btn px-4 py-2 rounded-lg text-xs font-medium bg-[#e94560]/20 text-[#e94560] flex-1 md:flex-none">All</button>
+                        <button onclick="filterPaymentStatus('paid')" class="payment-filter-btn px-4 py-2 rounded-lg text-xs font-medium glass-light flex-1 md:flex-none">Paid</button>
+                        <button onclick="filterPaymentStatus('partial')" class="payment-filter-btn px-4 py-2 rounded-lg text-xs font-medium glass-light flex-1 md:flex-none">Partial</button>
+                        <button onclick="filterPaymentStatus('owing')" class="payment-filter-btn px-4 py-2 rounded-lg text-xs font-medium glass-light flex-1 md:flex-none">Owing</button>
+                    </div>
+                    <button onclick="showRecordPaymentModal()" class="gradient-primary px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-2 w-full md:w-auto justify-center">
+                        <i class="fas fa-plus"></i> Record Payment
+                    </button>
+                </div>
+
+                <!-- Payment Table -->
+                <div class="glass rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-white/5 text-gray-500 text-xs uppercase">
+                                    <th class="text-left p-4">Parent / Scholar</th>
+                                    <th class="text-left p-4 hidden md:table-cell">School</th>
+                                    <th class="text-left p-4">Amount Due</th>
+                                    <th class="text-left p-4">Paid</th>
+                                    <th class="text-left p-4">Status</th>
+                                    <th class="text-left p-4 hidden md:table-cell">Last Payment</th>
+                                    <th class="text-center p-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentTableBody">
+                                <!-- Generated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== SCHOLARS PAGE ===== -->
+            <div id="page-scholars" class="page hidden slide-in">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div class="flex gap-4 items-center">
+                        <div class="relative">
+                            <input type="text" placeholder="Search scholars..." class="rounded-lg px-4 py-2 text-sm pl-10 w-64">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                        </div>
+                    </div>
+                    <button onclick="showAddScholarModal()" class="gradient-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Add Scholar
+                    </button>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="scholarsGrid">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+
+            <!-- ===== PARENTS PAGE ===== -->
+            <div id="page-parents" class="page hidden slide-in">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div class="relative">
+                        <input type="text" placeholder="Search parents..." class="rounded-lg px-4 py-2 text-sm pl-10 w-64">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                    </div>
+                    <button onclick="showAddParentModal()" class="gradient-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                        <i class="fas fa-user-plus"></i> Add Parent
+                    </button>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4" id="parentsGrid">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+
+            <!-- ===== VEHICLE INFO PAGE ===== -->
+            <div id="page-vehicle" class="page hidden slide-in">
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <!-- Vehicle Card -->
+                    <div class="glass rounded-2xl overflow-hidden">
+                        <div class="relative">
+                            <img src="https://images.pexels.com/photos/18435546/pexels-photo-18435546.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200" class="w-full h-48 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] to-transparent"></div>
+                            <div class="absolute bottom-4 left-4">
+                                <span class="bg-green-500/20 text-green-400 text-xs px-3 py-1 rounded-full font-medium">
+                                    <i class="fas fa-check-circle mr-1"></i>Roadworthy
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-bold">Toyota Quantum</h3>
+                                <span class="glass-light px-3 py-1 rounded-lg text-xs font-mono">GP 123-456</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p class="text-gray-500 text-xs">Year</p>
+                                    <p class="font-medium">2022</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-xs">Colour</p>
+                                    <p class="font-medium">White</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-xs">Seating Capacity</p>
+                                    <p class="font-medium">15 + Driver</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-xs">Current Scholars</p>
+                                    <p class="font-medium text-green-400">18 (2 trips)</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-xs">Engine No.</p>
+                                    <p class="font-medium font-mono text-xs">2KD-7834521</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-xs">VIN</p>
+                                    <p class="font-medium font-mono text-xs">JTFSX23...890</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Owner & Permit Details -->
+                    <div class="space-y-6">
+                        <!-- Owner Card -->
+                        <div class="glass rounded-2xl p-6">
+                            <h3 class="font-bold mb-4 flex items-center gap-2">
+                                <i class="fas fa-user-tie text-[#e94560]"></i> Vehicle Owner
+                            </h3>
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-16 h-16 rounded-full gradient-info flex items-center justify-center text-2xl font-bold">SM</div>
+                                <div>
+                                    <p class="font-bold text-lg">Sipho Mkhize</p>
+                                    <p class="text-gray-500 text-sm">Owner & Operator</p>
+                                </div>
+                            </div>
+                            <div class="space-y-3 text-sm">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-phone text-gray-500 w-5 text-center"></i>
+                                    <span>072 345 6789</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-envelope text-gray-500 w-5 text-center"></i>
+                                    <span>sipho.mkhize@email.co.za</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-map-marker-alt text-gray-500 w-5 text-center"></i>
+                                    <span>45 Vilakazi St, Soweto, Gauteng</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-id-card text-gray-500 w-5 text-center"></i>
+                                    <span>ID: 7804125...089</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Permits & Compliance -->
+                        <div class="glass rounded-2xl p-6">
+                            <h3 class="font-bold mb-4 flex items-center gap-2">
+                                <i class="fas fa-shield-alt text-green-400"></i> Permits & Compliance
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between glass-light rounded-lg p-3">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fas fa-file-alt text-green-400"></i>
+                                        <div>
+                                            <p class="text-sm font-medium">Operating Permit</p>
+                                            <p class="text-[10px] text-gray-500">Gauteng DOT</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-green-400 text-xs font-medium">Valid</span>
+                                </div>
+                                <div class="flex items-center justify-between glass-light rounded-lg p-3">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fas fa-car-crash text-green-400"></i>
+                                        <div>
+                                            <p class="text-sm font-medium">Roadworthy Certificate</p>
+                                            <p class="text-[10px] text-gray-500">Exp: 15 Dec 2026</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-green-400 text-xs font-medium">Valid</span>
+                                </div>
+                                <div class="flex items-center justify-between glass-light rounded-lg p-3">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fas fa-shield-alt text-green-400"></i>
+                                        <div>
+                                            <p class="text-sm font-medium">Insurance</p>
+                                            <p class="text-[10px] text-gray-500">Hollard • Policy #HLD-4521</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-green-400 text-xs font-medium">Active</span>
+                                </div>
+                                <div class="flex items-center justify-between glass-light rounded-lg p-3">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fas fa-certificate text-yellow-400"></i>
+                                        <div>
+                                            <p class="text-sm font-medium">Vehicle License Disc</p>
+                                            <p class="text-[10px] text-gray-500">Exp: 30 Sep 2026</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-yellow-400 text-xs font-medium">3 Months</span>
+                                </div>
+                                <div class="flex items-center justify-between glass-light rounded-lg p-3">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fas fa-fire-extinguisher text-green-400"></i>
+                                        <div>
+                                            <p class="text-sm font-medium">Fire Extinguisher</p>
+                                            <p class="text-[10px] text-gray-500">Serviced: Jan 2026</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-green-400 text-xs font-medium">Valid</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service History -->
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="font-bold mb-4 flex items-center gap-2">
+                        <i class="fas fa-wrench text-orange-400"></i> Service & Maintenance Log
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-white/5 text-gray-500 text-xs uppercase">
+                                    <th class="text-left p-3">Date</th>
+                                    <th class="text-left p-3">Service Type</th>
+                                    <th class="text-left p-3">Mileage</th>
+                                    <th class="text-left p-3">Cost</th>
+                                    <th class="text-left p-3">Provider</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-white/5 hover:bg-white/5">
+                                    <td class="p-3">15 Jun 2026</td>
+                                    <td class="p-3"><span class="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded text-xs">Full Service</span></td>
+                                    <td class="p-3">87,450 km</td>
+                                    <td class="p-3 font-medium">R4,200</td>
+                                    <td class="p-3">AutoZone Soweto</td>
+                                </tr>
+                                <tr class="border-b border-white/5 hover:bg-white/5">
+                                    <td class="p-3">02 May 2026</td>
+                                    <td class="p-3"><span class="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-xs">Tyre Replace</span></td>
+                                    <td class="p-3">83,200 km</td>
+                                    <td class="p-3 font-medium">R6,800</td>
+                                    <td class="p-3">Tiger Wheel & Tyre</td>
+                                </tr>
+                                <tr class="border-b border-white/5 hover:bg-white/5">
+                                    <td class="p-3">10 Mar 2026</td>
+                                    <td class="p-3"><span class="bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-xs">Oil Change</span></td>
+                                    <td class="p-3">78,100 km</td>
+                                    <td class="p-3 font-medium">R1,500</td>
+                                    <td class="p-3">Quick Lube JHB</td>
+                                </tr>
+                                <tr class="hover:bg-white/5">
+                                    <td class="p-3">20 Jan 2026</td>
+                                    <td class="p-3"><span class="bg-red-500/20 text-red-400 px-2 py-0.5 rounded text-xs">Brake Pads</span></td>
+                                    <td class="p-3">72,800 km</td>
+                                    <td class="p-3 font-medium">R3,200</td>
+                                    <td class="p-3">Midas Roodepoort</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== RATINGS PAGE ===== -->
+            <div id="page-ratings" class="page hidden slide-in">
+                <div class="grid md:grid-cols-3 gap-6 mb-6">
+                    <!-- Overall Rating -->
+                    <div class="glass rounded-2xl p-8 text-center">
+                        <div class="relative w-32 h-32 mx-auto mb-4">
+                            <svg class="w-32 h-32 progress-ring" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="54" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="none"/>
+                                <circle cx="60" cy="60" r="54" stroke="#e94560" stroke-width="8" fill="none" 
+                                        stroke-dasharray="339.29" stroke-dashoffset="67.86" stroke-linecap="round"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center flex-col">
+                                <span class="text-3xl font-bold">4.8</span>
+                                <span class="text-xs text-gray-500">out of 5</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-center gap-1 mb-2">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <i class="fas fa-star-half-alt text-yellow-400"></i>
+                        </div>
+                        <p class="text-sm text-gray-400">Based on 24 ratings</p>
+                        <p class="text-xs text-green-400 mt-2"><i class="fas fa-arrow-up mr-1"></i>0.3 from last month</p>
+                    </div>
+
+                    <!-- Rating Breakdown -->
+                    <div class="glass rounded-2xl p-6">
+                        <h3 class="font-bold mb-4">Rating Breakdown</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs w-12 text-gray-400">5 star</span>
+                                <div class="flex-1 bg-white/5 rounded-full h-3">
+                                    <div class="bg-yellow-400 h-3 rounded-full" style="width:75%"></div>
+                                </div>
+                                <span class="text-xs w-8 text-right text-gray-400">18</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs w-12 text-gray-400">4 star</span>
+                                <div class="flex-1 bg-white/5 rounded-full h-3">
+                                    <div class="bg-yellow-400 h-3 rounded-full" style="width:17%"></div>
+                                </div>
+                                <span class="text-xs w-8 text-right text-gray-400">4</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs w-12 text-gray-400">3 star</span>
+                                <div class="flex-1 bg-white/5 rounded-full h-3">
+                                    <div class="bg-yellow-400 h-3 rounded-full" style="width:8%"></div>
+                                </div>
+                                <span class="text-xs w-8 text-right text-gray-400">2</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs w-12 text-gray-400">2 star</span>
+                                <div class="flex-1 bg-white/5 rounded-full h-3">
+                                    <div class="bg-yellow-400 h-3 rounded-full" style="width:0%"></div>
+                                </div>
+                                <span class="text-xs w-8 text-right text-gray-400">0</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs w-12 text-gray-400">1 star</span>
+                                <div class="flex-1 bg-white/5 rounded-full h-3">
+                                    <div class="bg-yellow-400 h-3 rounded-full" style="width:0%"></div>
+                                </div>
+                                <span class="text-xs w-8 text-right text-gray-400">0</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-white/5">
+                            <div class="grid grid-cols-2 gap-2 text-center text-xs">
+                                <div class="glass-light rounded-lg p-2">
+                                    <p class="text-green-400 font-bold text-lg">98%</p>
+                                    <p class="text-gray-500">On-Time</p>
+                                </div>
+                                <div class="glass-light rounded-lg p-2">
+                                    <p class="text-blue-400 font-bold text-lg">100%</p>
+                                    <p class="text-gray-500">Safety</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Ratings -->
+                    <div class="glass rounded-2xl p-6">
+                        <h3 class="font-bold mb-4">Category Scores</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-sm flex items-center gap-2"><i class="fas fa-clock text-blue-400"></i> Punctuality</span>
+                                    <span class="text-sm font-bold text-blue-400">4.9</span>
+                                </div>
+                                <div class="bg-white/5 rounded-full h-2"><div class="bg-blue-400 h-2 rounded-full" style="width:98%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-sm flex items-center gap-2"><i class="fas fa-shield-alt text-green-400"></i> Safety</span>
+                                    <span class="text-sm font-bold text-green-400">5.0</span>
+                                </div>
+                                <div class="bg-white/5 rounded-full h-2"><div class="bg-green-400 h-2 rounded-full" style="width:100%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-sm flex items-center gap-2"><i class="fas fa-smile text-yellow-400"></i> Friendliness</span>
+                                    <span class="text-sm font-bold text-yellow-400">4.7</span>
+                                </div>
+                                <div class="bg-white/5 rounded-full h-2"><div class="bg-yellow-400 h-2 rounded-full" style="width:94%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-sm flex items-center gap-2"><i class="fas fa-broom text-purple-400"></i> Vehicle Cleanliness</span>
+                                    <span class="text-sm font-bold text-purple-400">4.6</span>
+                                </div>
+                                <div class="bg-white/5 rounded-full h-2"><div class="bg-purple-400 h-2 rounded-full" style="width:92%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-sm flex items-center gap-2"><i class="fas fa-comments text-cyan-400"></i> Communication</span>
+                                    <span class="text-sm font-bold text-cyan-400">4.8</span>
+                                </div>
+                                <div class="bg-white/5 rounded-full h-2"><div class="bg-cyan-400 h-2 rounded-full" style="width:96%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Reviews -->
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="font-bold mb-4">Recent Reviews from Parents</h3>
+                    <div class="space-y-4" id="reviewsList">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TRIPS PAGE ===== -->
+            <div id="page-trips" class="page hidden slide-in">
+                <div class="glass rounded-2xl p-6 mb-6">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+                                <i class="fas fa-route text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg" id="tripStatusText">No Active Trip</h3>
+                                <p class="text-sm text-gray-400" id="tripStatusSub">Start a new trip to begin tracking</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="startTrip()" id="btnStartTrip" class="gradient-primary px-6 py-3 rounded-xl font-medium flex items-center gap-2">
+                                <i class="fas fa-play"></i> Start Morning Trip
+                            </button>
+                            <button onclick="endTrip()" id="btnEndTrip" class="hidden gradient-danger px-6 py-3 rounded-xl font-medium flex items-center gap-2">
+                                <i class="fas fa-stop"></i> End Trip
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Active Trip Timer -->
+                    <div id="activeTripInfo" class="hidden mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="glass-light rounded-lg p-3 text-center">
+                            <p class="text-xs text-gray-500">Duration</p>
+                            <p class="text-xl font-bold font-mono text-cyan-400" id="tripTimer">00:00</p>
+                        </div>
+                        <div class="glass-light rounded-lg p-3 text-center">
+                            <p class="text-xs text-gray-500">Scholars Picked Up</p>
+                            <p class="text-xl font-bold text-green-400" id="pickedUpCount">0/18</p>
+                        </div>
+                        <div class="glass-light rounded-lg p-3 text-center">
+                            <p class="text-xs text-gray-500">Stops Made</p>
+                            <p class="text-xl font-bold text-yellow-400" id="stopsCount">0/12</p>
+                        </div>
+                        <div class="glass-light rounded-lg p-3 text-center">
+                            <p class="text-xs text-gray-500">Type</p>
+                            <p class="text-xl font-bold text-orange-400" id="tripType">AM</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trip History -->
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="font-bold mb-4">Trip History</h3>
+                    <div class="space-y-3">
+                        <div class="glass-light rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-400 text-sm font-bold">AM</div>
+                                <div>
+                                    <p class="font-medium text-sm">Morning Route - Soweto Circuit</p>
+                                    <p class="text-xs text-gray-500">Today, 06:15 - 07:22 • 18 scholars</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs">
+                                <span class="text-green-400"><i class="fas fa-check-circle mr-1"></i>Completed</span>
+                                <span class="text-gray-500">67 min</span>
+                            </div>
+                        </div>
+                        <div class="glass-light rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 text-sm font-bold">PM</div>
+                                <div>
+                                    <p class="font-medium text-sm">Afternoon Route - Soweto Circuit</p>
+                                    <p class="text-xs text-gray-500">Yesterday, 14:00 - 15:15 • 18 scholars</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs">
+                                <span class="text-green-400"><i class="fas fa-check-circle mr-1"></i>Completed</span>
+                                <span class="text-gray-500">75 min</span>
+                            </div>
+                        </div>
+                        <div class="glass-light rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-400 text-sm font-bold">AM</div>
+                                <div>
+                                    <p class="font-medium text-sm">Morning Route - Soweto Circuit</p>
+                                    <p class="text-xs text-gray-500">Yesterday, 06:10 - 07:18 • 17 scholars</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs">
+                                <span class="text-green-400"><i class="fas fa-check-circle mr-1"></i>Completed</span>
+                                <span class="text-gray-500">68 min</span>
+                                <span class="text-yellow-400"><i class="fas fa-exclamation-triangle mr-1"></i>1 absent</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== DRIVER PROFILE PAGE ===== -->
+            <div id="page-profile" class="page hidden slide-in">
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Profile Card -->
+                    <div class="glass rounded-2xl p-6 text-center">
+                        <div class="relative inline-block mb-4">
+                            <img src="https://images.pexels.com/photos/29221981/pexels-photo-29221981.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" 
+                                 class="w-28 h-28 rounded-full object-cover border-4 border-[#e94560] mx-auto">
+                            <div class="absolute bottom-1 right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-[#0a0a1a]"></div>
+                        </div>
+                        <h3 class="text-xl font-bold">Thabo Molefe</h3>
+                        <p class="text-gray-500 text-sm mb-2">Professional Scholar Transport Driver</p>
+                        <div class="flex justify-center gap-1 mb-3">
+                            <i class="fas fa-star text-yellow-400 text-sm"></i>
+                            <i class="fas fa-star text-yellow-400 text-sm"></i>
+                            <i class="fas fa-star text-yellow-400 text-sm"></i>
+                            <i class="fas fa-star text-yellow-400 text-sm"></i>
+                            <i class="fas fa-star-half-alt text-yellow-400 text-sm"></i>
+                            <span class="text-sm font-bold text-yellow-400 ml-1">4.8</span>
+                        </div>
+                        <span class="bg-green-500/20 text-green-400 text-xs px-4 py-1 rounded-full font-medium">Verified Driver</span>
+
+                        <div class="mt-6 grid grid-cols-3 gap-2 text-center">
+                            <div class="glass-light rounded-lg p-3">
+                                <p class="text-lg font-bold text-[#e94560]">5</p>
+                                <p class="text-[10px] text-gray-500">Years Exp</p>
+                            </div>
+                            <div class="glass-light rounded-lg p-3">
+                                <p class="text-lg font-bold text-green-400">18</p>
+                                <p class="text-[10px] text-gray-500">Scholars</p>
+                            </div>
+                            <div class="glass-light rounded-lg p-3">
+                                <p class="text-lg font-bold text-blue-400">2.4k</p>
+                                <p class="text-[10px] text-gray-500">Trips</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Details -->
+                    <div class="md:col-span-2 space-y-6">
+                        <div class="glass rounded-2xl p-6">
+                            <h3 class="font-bold mb-4 flex items-center gap-2">
+                                <i class="fas fa-user text-[#e94560]"></i> Personal Information
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <label class="text-xs text-gray-500 block mb-1">Full Name</label>
+                                    <p class="glass-light rounded-lg p-3">Thabo James Molefe</p>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500 block mb-1">ID Number</label>
+                                    <p class="glass-light rounded-lg p-3 font-mono">8506125...089</p>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500 block mb-1">Phone Number</label>
+                                    <p class="glass-light rounded-lg p-3">082 456 7890</p>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500 block mb-1">Email</label>
+                                    <p class="glass-light rounded-lg p-3">thabo.molefe@email.co.za</p>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="text-xs text-gray-500 block mb-1">Address</label>
+                                    <p class="glass-light rounded-lg p-3">123 Mandela Drive, Diepkloof, Soweto, 1862</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass rounded-2xl p-6">
+                            <h3 class="font-bold mb-4 flex items-center gap-2">
+                                <i class="fas fa-id-badge text-blue-400"></i> License & Credentials
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                                <div class="glass-light rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-xs text-gray-500">Driver's License</span>
+                                        <span class="text-green-400 text-xs"><i class="fas fa-check-circle"></i> Valid</span>
+                                    </div>
+                                    <p class="font-medium">Code EC (10)</p>
+                                    <p class="text-xs text-gray-500 mt-1">Exp: 15 Aug 2028</p>
+                                </div>
+                                <div class="glass-light rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-xs text-gray-500">PrDP (Professional Driving Permit)</span>
+                                        <span class="text-green-400 text-xs"><i class="fas fa-check-circle"></i> Valid</span>
+                                    </div>
+                                    <p class="font-medium">Passengers</p>
+                                    <p class="text-xs text-gray-500 mt-1">Exp: 20 Mar 2027</p>
+                                </div>
+                                <div class="glass-light rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-xs text-gray-500">Police Clearance</span>
+                                        <span class="text-green-400 text-xs"><i class="fas fa-check-circle"></i> Clear</span>
+                                    </div>
+                                    <p class="font-medium">No Criminal Record</p>
+                                    <p class="text-xs text-gray-500 mt-1">Issued: 10 Jan 2026</p>
+                                </div>
+                                <div class="glass-light rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-xs text-gray-500">First Aid Certificate</span>
+                                        <span class="text-green-400 text-xs"><i class="fas fa-check-circle"></i> Valid</span>
+                                    </div>
+                                    <p class="font-medium">Level 1 First Aid</p>
+                                    <p class="text-xs text-gray-500 mt-1">Exp: 05 Nov 2026</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Driver Info Card for Parents -->
+                        <div class="gradient-primary rounded-2xl p-6">
+                            <div class="flex items-center gap-3 mb-3">
+                                <i class="fas fa-share-alt text-xl"></i>
+                                <h3 class="font-bold">Share Driver Profile with Parents</h3>
+                            </div>
+                            <p class="text-white/70 text-sm mb-4">Give parents peace of mind by sharing your verified credentials and live rating.</p>
+                            <div class="flex gap-3">
+                                <button onclick="shareProfile('whatsapp')" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition">
+                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                </button>
+                                <button onclick="shareProfile('sms')" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition">
+                                    <i class="fas fa-sms"></i> SMS
+                                </button>
+                                <button onclick="shareProfile('copy')" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition">
+                                    <i class="fas fa-copy"></i> Copy Link
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== SETTINGS PAGE ===== -->
+            <div id="page-settings" class="page hidden slide-in">
+                <div class="max-w-2xl mx-auto space-y-6">
+                    <div class="glass rounded-2xl p-6">
+                        <h3 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-bell text-[#e94560]"></i> Notifications</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm font-medium">Payment Reminders</p><p class="text-xs text-gray-500">Auto-send reminders to owing parents</p></div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked class="sr-only peer">
+                                    <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e94560]"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm font-medium">Trip Notifications</p><p class="text-xs text-gray-500">Notify parents when trip starts/ends</p></div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked class="sr-only peer">
+                                    <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e94560]"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm font-medium">New Rating Alerts</p><p class="text-xs text-gray-500">Get notified when a parent rates you</p></div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked class="sr-only peer">
+                                    <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e94560]"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass rounded-2xl p-6">
+                        <h3 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-money-check-alt text-green-400"></i> Payment Settings</h3>
+                        <div class="space-y-4 text-sm">
+                            <div>
+                                <label class="text-xs text-gray-500 block mb-1">Monthly Fee per Scholar</label>
+                                <input type="text" value="R 900.00" class="w-full rounded-lg px-4 py-2">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 block mb-1">Payment Due Date</label>
+                                <select class="w-full rounded-lg px-4 py-2">
+                                    <option>1st of each month</option>
+                                    <option>5th of each month</option>
+                                    <option>Last day of previous month</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 block mb-1">Bank Account (for reference)</label>
+                                <input type="text" value="FNB • Acc: ****4521" class="w-full rounded-lg px-4 py-2">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass rounded-2xl p-6">
+                        <h3 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-route text-cyan-400"></i> Route Settings</h3>
+                        <div class="space-y-4 text-sm">
+                            <div>
+                                <label class="text-xs text-gray-500 block mb-1">Route Name</label>
+                                <input type="text" value="Soweto Circuit" class="w-full rounded-lg px-4 py-2">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-xs text-gray-500 block mb-1">Morning Pickup Time</label>
+                                    <input type="time" value="06:15" class="w-full rounded-lg px-4 py-2">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500 block mb-1">Afternoon Dropoff Time</label>
+                                    <input type="time" value="14:00" class="w-full rounded-lg px-4 py-2">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="w-full gradient-primary py-3 rounded-xl font-medium">Save Settings</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ===== MODALS ===== -->
+    
+    <!-- Record Payment Modal -->
+    <div id="recordPaymentModal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 modal-overlay">
+        <div class="glass rounded-2xl p-6 w-full max-w-md slide-in bg-[#1a1a2e]">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="font-bold text-lg">Record Payment</h3>
+                <button onclick="closeModal('recordPaymentModal')" class="text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-500 block mb-1">Parent</label>
+                    <select class="w-full rounded-lg px-4 py-2 text-sm" id="paymentParentSelect">
+                        <option value="">Select parent...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 block mb-1">Amount (ZAR)</label>
+                    <input type="number" placeholder="e.g. 900" class="w-full rounded-lg px-4 py-2 text-sm" id="paymentAmount">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 block mb-1">Payment Method</label>
+                    <select class="w-full rounded-lg px-4 py-2 text-sm">
+                        <option>Cash</option>
+                        <option>EFT / Bank Transfer</option>
+                        <option>Capitec Pay</option>
+                        <option>eWallet</option>
+                        <option>SnapScan</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 block mb-1">Month For</label>
+                    <select class="w-full rounded-lg px-4 py-2 text-sm">
+                        <option>June 2026</option>
+                        <option>July 2026</option>
+                        <option>May 2026 (Arrears)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 block mb-1">Note (optional)</label>
+                    <textarea class="w-full rounded-lg px-4 py-2 text-sm" rows="2" placeholder="Any notes..."></textarea>
+                </div>
+                <button onclick="recordPayment()" class="w-full gradient-success py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                    <i class="fas fa-check"></i> Record Payment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Scholar Modal -->
+    <div id="addScholarModal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 modal-overlay">
+        <div class="glass rounded-2xl p-6 w-full max-w-md slide-in bg-[#1a1a2e] max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="font-bold text-lg">Add New Scholar</h3>
+                <button onclick="closeModal('addScholarModal')" class="text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-gray-500 block mb-1">First Name</label>
+                        <input type="text" placeholder="e.g. Lerato" class="w-full rounded-lg px-4 py-2 text-sm" id="scholarFirstName">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 block mb-1">Surname</label>
+                        <input type="text" placeholder="e.g. Dlamini" class="w-full rounded-lg px-4 py-2 text-sm" id="scholarSurname">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 block mb-1">School</label>
+                    <input type="text" placeholder="e.g. Soweto Primary" class="w-full rounded-lg px-4 py-2 text-sm" id="scholarSchool">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-gray-500 block mb-1">Grade</label>
+                        <select class="w-full rounded-lg px-4 py-2 text-sm" id="scholarGrade">
+                            <option>Grade R</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+                            <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option>
+                            <option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 block mb-1">Age</label>
+                        <input type="number" placeholder="e.g. 10" class="w-full rounded-lg px-4 py-2 text-sm" id="scholarAge">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 block mb-1">Parent Name</label>
+                    <input type="text" placeholder="e.g. Mrs. Dlamini" class="w-full rounded-lg px-4 py-2 text-sm" id="scholarParent">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 block mb-1">Parent Phone</label>
+                    <input type="tel" placeholder="e.g. 072 345 6789" class="w-full rounded-lg px-4 py-2 text-sm" id="scholarParentPhone">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 block mb-1">Pickup Address</label>
+                    <input type="text" placeholder="e.g. 45 Vilakazi St, Soweto" class="w-full rounded-lg px-4 py-2 text-sm" id="scholarAddress">
+                </div>
+                <button onclick="addScholar()" class="w-full gradient-primary py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                    <i class="fas fa-plus"></i> Add Scholar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Parent Modal -->
+    <div id="addParentModal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 modal-overlay">
+        <div class="glass rounded-2xl p-6 w-full max-w-md slide-in bg-[#1a1a2e]">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="font-bold text-lg">Add New Parent</h3>
+                <button onclick="closeModal('addParentModal')" class="text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-500 block mb-1">Full Name</label>
+                    <input type="text" placeholder="e.g. Nomsa Dlamini" class="w-full rounded-lg px-4 py-2 text-sm" id="parentName">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 block mb-1">Phone Number</label>
+                    <input type="tel" placeholder="e.g. 072 345 6789" class="w-full rounded-lg px-4 py-2 text-sm" id="parentPhone">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 block mb-1">Email (optional)</label>
+                    <input type="email" placeholder="e.g. nomsa@email.co.za" class="w-full rounded-lg px-4 py-2 text-sm" id="parentEmail">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 block mb-1">Address</label>
+                    <input type="text" placeholder="e.g. 45 Vilakazi St, Soweto" class="w-full rounded-lg px-4 py-2 text-sm" id="parentAddress">
+                </div>
+                <button onclick="addParent()" class="w-full gradient-primary py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                    <i class="fas fa-user-plus"></i> Add Parent
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Panel -->
+    <div id="notificationPanel" class="fixed inset-0 z-[60] hidden modal-overlay" onclick="closeNotifications(event)">
+        <div class="absolute right-0 top-0 w-full md:w-96 h-full bg-[#1a1a2e] border-l border-white/5 slide-in overflow-y-auto">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-bold text-lg">Notifications</h3>
+                    <button onclick="document.getElementById('notificationPanel').classList.add('hidden')" class="text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="space-y-3">
+                    <div class="glass-light rounded-xl p-4 border-l-4 border-red-500">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 mt-0.5">
+                                <i class="fas fa-exclamation"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">Payment Overdue</p>
+                                <p class="text-xs text-gray-400">Mrs. Ndlovu hasn't paid for June. R900 outstanding.</p>
+                                <p class="text-[10px] text-gray-600 mt-1">2 hours ago</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-light rounded-xl p-4 border-l-4 border-yellow-500">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400 mt-0.5">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">New Rating Received</p>
+                                <p class="text-xs text-gray-400">Mrs. Khumalo rated you 5 stars! "Excellent driver, always on time."</p>
+                                <p class="text-[10px] text-gray-600 mt-1">5 hours ago</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-light rounded-xl p-4 border-l-4 border-green-500">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 mt-0.5">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">Payment Received</p>
+                                <p class="text-xs text-gray-400">Mr. Zulu paid R900 via EFT for June.</p>
+                                <p class="text-[10px] text-gray-600 mt-1">Yesterday</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-light rounded-xl p-4 border-l-4 border-blue-500">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 mt-0.5">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">License Reminder</p>
+                                <p class="text-xs text-gray-400">Your vehicle license disc expires in 3 months. Renew before 30 Sep 2026.</p>
+                                <p class="text-[10px] text-gray-600 mt-1">2 days ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-[70] hidden slide-in">
+        <div class="glass rounded-xl p-4 flex items-center gap-3 bg-[#1a1a2e] border border-green-500/30 shadow-2xl min-w-[300px]">
+            <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400" id="toastIcon">
+                <i class="fas fa-check"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium" id="toastTitle">Success</p>
+                <p class="text-xs text-gray-400" id="toastMessage">Action completed successfully.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+        // ============ DATA ============
+        const scholars = [
+            { id: 1, name: "Amahle Nkosi", school: "Soweto Primary", grade: "Grade 4", age: 10, parentId: 1, address: "12 Klipspruit Rd, Soweto", pickup: "06:20" },
+            { id: 2, name: "Bongani Zulu", school: "Soweto Primary", grade: "Grade 6", age: 12, parentId: 2, address: "34 Molapo St, Soweto", pickup: "06:25" },
+            { id: 3, name: "Zanele Zulu", school: "Soweto Primary", grade: "Grade 3", age: 9, parentId: 2, address: "34 Molapo St, Soweto", pickup: "06:25" },
+            { id: 4, name: "Thandi Khumalo", school: "Diepkloof Secondary", grade: "Grade 8", age: 14, parentId: 3, address: "78 Immink Dr, Diepkloof", pickup: "06:30" },
+            { id: 5, name: "Sipho Dlamini", school: "Soweto Primary", grade: "Grade 5", age: 11, parentId: 4, address: "5 Vilakazi St, Soweto", pickup: "06:22" },
+            { id: 6, name: "Lerato Dlamini", school: "Soweto Primary", grade: "Grade 2", age: 8, parentId: 4, address: "5 Vilakazi St, Soweto", pickup: "06:22" },
+            { id: 7, name: "Kagiso Modise", school: "Diepkloof Secondary", grade: "Grade 9", age: 15, parentId: 5, address: "90 Koma Rd, Meadowlands", pickup: "06:35" },
+            { id: 8, name: "Naledi Mokoena", school: "Soweto Primary", grade: "Grade 7", age: 13, parentId: 6, address: "22 Phathi St, Orlando", pickup: "06:28" },
+            { id: 9, name: "Tshepiso Mahlangu", school: "Soweto Primary", grade: "Grade 1", age: 7, parentId: 7, address: "67 Bolani Rd, Dobsonville", pickup: "06:40" },
+            { id: 10, name: "Kgotso Ndlovu", school: "Diepkloof Secondary", grade: "Grade 10", age: 16, parentId: 8, address: "15 Maseko St, Dube", pickup: "06:32" },
+            { id: 11, name: "Mpho Ndlovu", school: "Soweto Primary", grade: "Grade 4", age: 10, parentId: 8, address: "15 Maseko St, Dube", pickup: "06:32" },
+            { id: 12, name: "Ayanda Sithole", school: "Soweto Primary", grade: "Grade 6", age: 12, parentId: 9, address: "41 Power Park, Soweto", pickup: "06:38" },
+            { id: 13, name: "Lethabo Mabaso", school: "Diepkloof Secondary", grade: "Grade 11", age: 17, parentId: 10, address: "8 Ntemi Piliso St, Soweto", pickup: "06:27" },
+            { id: 14, name: "Relebogile Motaung", school: "Soweto Primary", grade: "Grade 3", age: 9, parentId: 11, address: "55 Chris Hani Rd, Soweto", pickup: "06:42" },
+            { id: 15, name: "Omphile Tshabalala", school: "Soweto Primary", grade: "Grade 5", age: 11, parentId: 12, address: "30 Pooe St, Kliptown", pickup: "06:18" },
+            { id: 16, name: "Neo Moloi", school: "Diepkloof Secondary", grade: "Grade 8", age: 14, parentId: 13, address: "19 Elias Motsoaledi Rd", pickup: "06:36" },
+            { id: 17, name: "Palesa Radebe", school: "Soweto Primary", grade: "Grade 7", age: 13, parentId: 14, address: "72 Mphuthi St, Soweto", pickup: "06:44" },
+            { id: 18, name: "Lesedi Mthembu", school: "Soweto Primary", grade: "Grade 2", age: 8, parentId: 15, address: "3 Union Ave, Meadowlands", pickup: "06:34" },
+        ];
+
+        const parents = [
+            { id: 1, name: "Mrs. Nomsa Nkosi", phone: "072 345 1111", email: "nomsa@email.co.za", address: "12 Klipspruit Rd, Soweto", paid: 900, owing: 0, status: "paid", lastPayment: "01 Jun 2026" },
+            { id: 2, name: "Mr. Mandla Zulu", phone: "083 456 2222", email: "mandla.z@email.co.za", address: "34 Molapo St, Soweto", paid: 1800, owing: 0, status: "paid", lastPayment: "03 Jun 2026" },
+            { id: 3, name: "Mrs. Grace Khumalo", phone: "071 567 3333", email: "grace.k@email.co.za", address: "78 Immink Dr, Diepkloof", paid: 900, owing: 0, status: "paid", lastPayment: "05 Jun 2026" },
+            { id: 4, name: "Mrs. Beauty Dlamini", phone: "082 678 4444", email: "beauty.d@email.co.za", address: "5 Vilakazi St, Soweto", paid: 1800, owing: 0, status: "paid", lastPayment: "02 Jun 2026" },
+            { id: 5, name: "Mr. Jacob Modise", phone: "073 789 5555", email: "jacob.m@email.co.za", address: "90 Koma Rd, Meadowlands", paid: 500, owing: 400, status: "partial", lastPayment: "10 Jun 2026" },
+            { id: 6, name: "Mrs. Dineo Mokoena", phone: "084 890 6666", email: "dineo.m@email.co.za", address: "22 Phathi St, Orlando", paid: 900, owing: 0, status: "paid", lastPayment: "01 Jun 2026" },
+            { id: 7, name: "Mr. Peter Mahlangu", phone: "072 901 7777", email: "peter.m@email.co.za", address: "67 Bolani Rd, Dobsonville", paid: 900, owing: 0, status: "paid", lastPayment: "04 Jun 2026" },
+            { id: 8, name: "Mrs. Joyce Ndlovu", phone: "083 012 8888", email: "joyce.n@email.co.za", address: "15 Maseko St, Dube", paid: 0, owing: 1800, status: "owing", lastPayment: "—" },
+            { id: 9, name: "Mr. Samuel Sithole", phone: "071 123 9999", email: "samuel.s@email.co.za", address: "41 Power Park, Soweto", paid: 900, owing: 0, status: "paid", lastPayment: "06 Jun 2026" },
+            { id: 10, name: "Mrs. Lebo Mabaso", phone: "082 234 0000", email: "lebo.m@email.co.za", address: "8 Ntemi Piliso St, Soweto", paid: 900, owing: 0, status: "paid", lastPayment: "01 Jun 2026" },
+            { id: 11, name: "Mrs. Thandiwe Motaung", phone: "073 345 1122", email: "thandi.mt@email.co.za", address: "55 Chris Hani Rd, Soweto", paid: 600, owing: 300, status: "partial", lastPayment: "15 Jun 2026" },
+            { id: 12, name: "Mr. William Tshabalala", phone: "084 456 2233", email: "will.t@email.co.za", address: "30 Pooe St, Kliptown", paid: 900, owing: 0, status: "paid", lastPayment: "02 Jun 2026" },
+            { id: 13, name: "Mrs. Patience Moloi", phone: "072 567 3344", email: "patience.m@email.co.za", address: "19 Elias Motsoaledi Rd", paid: 0, owing: 900, status: "owing", lastPayment: "—" },
+            { id: 14, name: "Mr. David Radebe", phone: "083 678 4455", email: "david.r@email.co.za", address: "72 Mphuthi St, Soweto", paid: 900, owing: 0, status: "paid", lastPayment: "03 Jun 2026" },
+            { id: 15, name: "Mrs. Flora Mthembu", phone: "071 789 5566", email: "flora.m@email.co.za", address: "3 Union Ave, Meadowlands", paid: 900, owing: 0, status: "paid", lastPayment: "01 Jun 2026" },
+        ];
+
+        const reviews = [
+            { parentId: 3, rating: 5, date: "18 Jun 2026", comment: "Thabo is an excellent driver! Always on time, and my Thandi feels safe. Highly recommend.", category: "punctuality" },
+            { parentId: 1, rating: 5, date: "15 Jun 2026", comment: "Very professional. The van is always clean and he communicates well. 10/10!", category: "safety" },
+            { parentId: 4, rating: 5, date: "12 Jun 2026", comment: "Both my kids love traveling with Bra Thabo. He's patient and careful with the little ones.", category: "friendliness" },
+            { parentId: 6, rating: 4, date: "10 Jun 2026", comment: "Good driver overall. Sometimes 5 minutes late but always communicates ahead of time.", category: "punctuality" },
+            { parentId: 2, rating: 5, date: "08 Jun 2026", comment: "Best scholar transport in Soweto! Both my children are happy and safe.", category: "safety" },
+            { parentId: 9, rating: 5, date: "05 Jun 2026", comment: "Reliable and trustworthy. Ayanda always arrives home safely. Thank you Thabo!", category: "safety" },
+            { parentId: 10, rating: 4, date: "02 Jun 2026", comment: "Very good service. Lethabo has never missed school because of transport issues.", category: "punctuality" },
+        ];
+
+        // ============ STATE ============
+        let currentPage = 'dashboard';
+        let tripActive = false;
+        let tripStartTime = null;
+        let tripInterval = null;
+        let currentPaymentFilter = 'all';
+
+        // ============ INITIALIZATION ============
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('splashScreen').style.opacity = '0';
+                setTimeout(() => document.getElementById('splashScreen').style.display = 'none', 500);
+            }, 2000);
+            
+            renderDashboard();
+            renderPayments();
+            renderScholars();
+            renderParents();
+            renderReviews();
+            renderPaymentChart();
+            populatePaymentParentSelect();
+        });
+
+        // ============ NAVIGATION ============
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            
+            document.getElementById(`page-${page}`).classList.remove('hidden');
+            document.getElementById(`page-${page}`).classList.add('slide-in');
+            document.getElementById(`nav-${page}`).classList.add('active');
+            
+            const titles = {
+                dashboard: ['Dashboard', 'Welcome back, Thabo! Here\'s your overview.'],
+                payments: ['Payments', 'Track and manage parent payments.'],
+                scholars: ['Scholars', 'Manage your registered learners.'],
+                parents: ['Parents', 'Parent contact information and details.'],
+                vehicle: ['Vehicle Info', 'Vehicle details, owner info & compliance.'],
+                ratings: ['Ratings & Reviews', 'Your performance ratings from parents.'],
+                trips: ['Trip Log', 'Track and manage your daily routes.'],
+                profile: ['Driver Profile', 'Your personal and professional details.'],
+                settings: ['Settings', 'Manage app preferences.'],
+            };
+            
+            if (titles[page]) {
+                document.getElementById('pageTitle').textContent = titles[page][0];
+                document.getElementById('pageSubtitle').textContent = titles[page][1];
+            }
+            
+            currentPage = page;
+            
+            // Close mobile sidebar
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('sidebarOverlay').classList.add('hidden');
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('hidden');
+        }
+
+        // ============ DASHBOARD RENDERS ============
+        function renderDashboard() {
+            renderRecentPayments();
+            renderOwingParents();
+        }
+
+        function renderPaymentChart() {
+            const chart = document.getElementById('paymentChart');
+            const months = [
+                { received: 14400, outstanding: 1800 },
+                { received: 15300, outstanding: 900 },
+                { received: 13500, outstanding: 2700 },
+                { received: 16200, outstanding: 0 },
+                { received: 14850, outstanding: 1350 },
+                { received: 12600, outstanding: 3600 },
+            ];
+            
+            const maxVal = 16200;
+            chart.innerHTML = months.map((m, i) => {
+                const receivedH = (m.received / maxVal) * 100;
+                const outstandingH = (m.outstanding / maxVal) * 100;
+                return `
+                    <div class="flex flex-col items-center gap-1 h-full justify-end">
+                        <div class="w-full rounded-t-lg bg-gradient-to-t from-green-500 to-green-400 transition-all duration-500" style="height:${receivedH}%"></div>
+                        ${m.outstanding > 0 ? `<div class="w-full rounded-t-lg bg-gradient-to-t from-red-500 to-red-400 transition-all duration-500" style="height:${outstandingH}%"></div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderRecentPayments() {
+            const list = document.getElementById('recentPaymentsList');
+            const paidParents = parents.filter(p => p.status === 'paid' || p.status === 'partial').slice(0, 5);
+            list.innerHTML = paidParents.map(p => `
+                <div class="flex items-center justify-between glass-light rounded-xl p-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full ${p.status === 'paid' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'} flex items-center justify-center text-sm font-bold">
+                            ${p.name.split(' ').slice(-1)[0][0]}${p.name.split(' ')[0].replace('Mrs.','').replace('Mr.','')[0] || ''}
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium">${p.name}</p>
+                            <p class="text-[10px] text-gray-500">${p.lastPayment}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-bold ${p.status === 'paid' ? 'text-green-400' : 'text-yellow-400'}">R${p.paid.toLocaleString()}</p>
+                        <p class="text-[10px] text-gray-500">${p.status === 'paid' ? 'Paid' : 'Partial'}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderOwingParents() {
+            const list = document.getElementById('owingParentsList');
+            const owing = parents.filter(p => p.owing > 0);
+            list.innerHTML = owing.map(p => {
+                const scholarNames = scholars.filter(s => s.parentId === p.id).map(s => s.name.split(' ')[0]).join(', ');
+                return `
+                    <div class="flex items-center justify-between glass-light rounded-xl p-3 border-l-4 ${p.status === 'owing' ? 'border-red-500' : 'border-yellow-500'}">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-sm font-bold">
+                                ${p.name.split(' ').slice(-1)[0][0]}
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">${p.name}</p>
+                                <p class="text-[10px] text-gray-500">Children: ${scholarNames}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-red-400">R${p.owing.toLocaleString()}</p>
+                            <button onclick="sendSingleReminder('${p.name}')" class="text-[10px] text-[#e94560] hover:underline cursor-pointer">Send Reminder</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============ PAYMENTS ============
+        function renderPayments() {
+            const tbody = document.getElementById('paymentTableBody');
+            const search = document.getElementById('paymentSearch')?.value?.toLowerCase() || '';
+            
+            let filtered = parents;
+            if (currentPaymentFilter !== 'all') {
+                filtered = parents.filter(p => p.status === currentPaymentFilter);
+            }
+            if (search) {
+                filtered = filtered.filter(p => {
+                    const scholarNames = scholars.filter(s => s.parentId === p.id).map(s => s.name).join(' ');
+                    return p.name.toLowerCase().includes(search) || scholarNames.toLowerCase().includes(search);
+                });
+            }
+
+            tbody.innerHTML = filtered.map(p => {
+                const parentScholars = scholars.filter(s => s.parentId === p.id);
+                const totalDue = parentScholars.length * 900;
+                const statusBadge = p.status === 'paid' 
+                    ? '<span class="bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full text-xs">Paid</span>'
+                    : p.status === 'partial'
+                    ? '<span class="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full text-xs">Partial</span>'
+                    : '<span class="bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full text-xs">Owing</span>';
+                
+                return `
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition">
+                        <td class="p-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full ${p.status === 'paid' ? 'bg-green-500/20 text-green-400' : p.status === 'partial' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'} flex items-center justify-center text-xs font-bold">
+                                    ${p.name.split(' ').slice(-1)[0][0]}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-sm">${p.name}</p>
+                                    <p class="text-[10px] text-gray-500">${parentScholars.map(s => s.name.split(' ')[0]).join(', ')}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4 hidden md:table-cell text-xs text-gray-400">${parentScholars[0]?.school || ''}</td>
+                        <td class="p-4 font-medium text-sm">R${totalDue.toLocaleString()}</td>
+                        <td class="p-4 font-medium text-sm ${p.paid >= totalDue ? 'text-green-400' : 'text-yellow-400'}">R${p.paid.toLocaleString()}</td>
+                        <td class="p-4">${statusBadge}</td>
+                        <td class="p-4 hidden md:table-cell text-xs text-gray-500">${p.lastPayment}</td>
+                        <td class="p-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                ${p.owing > 0 ? `<button onclick="sendSingleReminder('${p.name}')" class="text-orange-400 hover:text-orange-300 text-xs" title="Send Reminder"><i class="fas fa-paper-plane"></i></button>` : ''}
+                                <button onclick="showRecordPaymentForParent(${p.id})" class="text-green-400 hover:text-green-300 text-xs" title="Record Payment"><i class="fas fa-plus-circle"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterPayments() { renderPayments(); }
+        
+        function filterPaymentStatus(status) {
+            currentPaymentFilter = status;
+            document.querySelectorAll('.payment-filter-btn').forEach(b => {
+                b.className = b.className.replace('bg-[#e94560]/20 text-[#e94560]', 'glass-light');
+            });
+            event.target.className = event.target.className.replace('glass-light', 'bg-[#e94560]/20 text-[#e94560]');
+            renderPayments();
+        }
+
+        // ============ SCHOLARS ============
+        function renderScholars() {
+            const grid = document.getElementById('scholarsGrid');
+            grid.innerHTML = scholars.map(s => {
+                const parent = parents.find(p => p.id === s.parentId);
+                const statusColor = parent?.status === 'paid' ? 'green' : parent?.status === 'partial' ? 'yellow' : 'red';
+                return `
+                    <div class="glass rounded-2xl p-4 card-hover">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
+                                    ${s.name.split(' ')[0][0]}${s.name.split(' ')[1][0]}
+                                </div>
+                                <div>
+                                    <p class="font-bold text-sm">${s.name}</p>
+                                    <p class="text-[10px] text-gray-500">${s.school}</p>
+                                </div>
+                            </div>
+                            <span class="w-2.5 h-2.5 rounded-full bg-${statusColor}-400" title="Payment: ${parent?.status}"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+                            <div class="glass-light rounded-lg p-2">
+                                <span class="text-gray-500">Grade</span>
+                                <p class="font-medium">${s.grade}</p>
+                            </div>
+                            <div class="glass-light rounded-lg p-2">
+                                <span class="text-gray-500">Age</span>
+                                <p class="font-medium">${s.age} years</p>
+                            </div>
+                            <div class="glass-light rounded-lg p-2 col-span-2">
+                                <span class="text-gray-500">Pickup</span>
+                                <p class="font-medium">${s.address}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-gray-500"><i class="fas fa-user mr-1"></i>${parent?.name || 'Unknown'}</span>
+                            <span class="text-gray-500"><i class="fas fa-clock mr-1"></i>${s.pickup}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============ PARENTS ============
+        function renderParents() {
+            const grid = document.getElementById('parentsGrid');
+            grid.innerHTML = parents.map(p => {
+                const parentScholars = scholars.filter(s => s.parentId === p.id);
+                const totalDue = parentScholars.length * 900;
+                return `
+                    <div class="glass rounded-2xl p-5 card-hover ${p.status === 'paid' ? 'status-paid' : p.status === 'partial' ? 'status-partial' : 'status-owing'}">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full ${p.status === 'paid' ? 'bg-green-500/20 text-green-400' : p.status === 'partial' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'} flex items-center justify-center text-lg font-bold">
+                                    ${p.name.split(' ').slice(-1)[0][0]}
+                                </div>
+                                <div>
+                                    <p class="font-bold">${p.name}</p>
+                                    <p class="text-xs text-gray-500">${parentScholars.length} scholar${parentScholars.length > 1 ? 's' : ''}</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-full ${p.status === 'paid' ? 'bg-green-500/20 text-green-400' : p.status === 'partial' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'}">
+                                ${p.status === 'paid' ? 'Paid' : p.status === 'partial' ? 'Partial' : 'Owing'}
+                            </span>
+                        </div>
+                        <div class="space-y-2 text-sm mb-4">
+                            <div class="flex items-center gap-2 text-gray-400">
+                                <i class="fas fa-phone w-4 text-center text-xs"></i>
+                                <a href="tel:${p.phone.replace(/\s/g,'')}" class="hover:text-white transition">${p.phone}</a>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-400">
+                                <i class="fas fa-envelope w-4 text-center text-xs"></i>
+                                <span class="truncate">${p.email}</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-400">
+                                <i class="fas fa-map-marker-alt w-4 text-center text-xs"></i>
+                                <span class="truncate">${p.address}</span>
+                            </div>
+                        </div>
+                        <div class="glass-light rounded-lg p-3 mb-3">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-gray-500">Payment Progress</span>
+                                <span class="font-medium">R${p.paid} / R${totalDue}</span>
+                            </div>
+                            <div class="bg-white/5 rounded-full h-2">
+                                <div class="h-2 rounded-full ${p.status === 'paid' ? 'bg-green-400' : p.status === 'partial' ? 'bg-yellow-400' : 'bg-red-400'}" 
+                                     style="width: ${(p.paid/totalDue)*100}%"></div>
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            <span><i class="fas fa-child mr-1"></i>${parentScholars.map(s => s.name.split(' ')[0]).join(', ')}</span>
+                        </div>
+                        <div class="flex gap-2 mt-3">
+                            <a href="tel:${p.phone.replace(/\s/g,'')}" class="flex-1 text-center glass-light py-2 rounded-lg text-xs font-medium hover:bg-white/10 transition">
+                                <i class="fas fa-phone mr-1"></i>Call
+                            </a>
+                            <button onclick="sendWhatsApp('${p.phone}')" class="flex-1 text-center glass-light py-2 rounded-lg text-xs font-medium hover:bg-white/10 transition text-green-400">
+                                <i class="fab fa-whatsapp mr-1"></i>WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============ REVIEWS ============
+        function renderReviews() {
+            const list = document.getElementById('reviewsList');
+            list.innerHTML = reviews.map(r => {
+                const parent = parents.find(p => p.id === r.parentId);
+                const stars = Array(5).fill('').map((_, i) => 
+                    `<i class="fas fa-star ${i < r.rating ? 'text-yellow-400' : 'text-gray-600'} text-xs"></i>`
+                ).join('');
+                return `
+                    <div class="glass-light rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold">
+                                    ${parent?.name.split(' ').slice(-1)[0][0] || '?'}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium">${parent?.name || 'Anonymous'}</p>
+                                    <div class="flex items-center gap-1">${stars}</div>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-gray-500">${r.date}</span>
+                        </div>
+                        <p class="text-sm text-gray-300 ml-12">"${r.comment}"</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============ TRIP MANAGEMENT ============
+        function startTrip() {
+            tripActive = true;
+            tripStartTime = new Date();
+            
+            document.getElementById('tripStatusText').textContent = 'Morning Route Active';
+            document.getElementById('tripStatusSub').textContent = 'Soweto Circuit • Started at ' + tripStartTime.toLocaleTimeString('en-ZA', {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('btnStartTrip').classList.add('hidden');
+            document.getElementById('btnEndTrip').classList.remove('hidden');
+            document.getElementById('activeTripInfo').classList.remove('hidden');
+            
+            let picked = 0;
+            let stops = 0;
+            
+            tripInterval = setInterval(() => {
+                const elapsed = Math.floor((new Date() - tripStartTime) / 1000);
+                const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                const secs = (elapsed % 60).toString().padStart(2, '0');
+                document.getElementById('tripTimer').textContent = `${mins}:${secs}`;
+                
+                if (picked < 18 && Math.random() > 0.85) {
+                    picked = Math.min(picked + Math.ceil(Math.random() * 2), 18);
+                    document.getElementById('pickedUpCount').textContent = `${picked}/18`;
+                }
+                if (stops < 12 && picked > stops * 1.5) {
+                    stops = Math.min(stops + 1, 12);
+                    document.getElementById('stopsCount').textContent = `${stops}/12`;
+                }
+            }, 1000);
+            
+            showToast('Trip Started', 'Morning route has begun. Parents will be notified.', 'success');
+            
+            if (currentPage !== 'trips') showPage('trips');
+        }
+
+        function endTrip() {
+            tripActive = false;
+            clearInterval(tripInterval);
+            
+            document.getElementById('tripStatusText').textContent = 'No Active Trip';
+            document.getElementById('tripStatusSub').textContent = 'Start a new trip to begin tracking';
+            document.getElementById('btnStartTrip').classList.remove('hidden');
+            document.getElementById('btnEndTrip').classList.add('hidden');
+            document.getElementById('activeTripInfo').classList.add('hidden');
+            
+            showToast('Trip Completed', 'Morning route completed. All scholars delivered safely.', 'success');
+        }
+
+        // ============ MODALS ============
+        function showRecordPaymentModal() {
+            document.getElementById('recordPaymentModal').classList.remove('hidden');
+            document.getElementById('recordPaymentModal').classList.add('flex');
+        }
+
+        function showRecordPaymentForParent(parentId) {
+            showRecordPaymentModal();
+            document.getElementById('paymentParentSelect').value = parentId;
+        }
+
+        function showAddScholarModal() {
+            document.getElementById('addScholarModal').classList.remove('hidden');
+            document.getElementById('addScholarModal').classList.add('flex');
+        }
+
+        function showAddParentModal() {
+            document.getElementById('addParentModal').classList.remove('hidden');
+            document.getElementById('addParentModal').classList.add('flex');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            document.getElementById(id).classList.remove('flex');
+        }
+
+        function populatePaymentParentSelect() {
+            const select = document.getElementById('paymentParentSelect');
+            select.innerHTML = '<option value="">Select parent...</option>' + 
+                parents.map(p => `<option value="${p.id}">${p.name} ${p.owing > 0 ? `(Owing R${p.owing})` : ''}</option>`).join('');
+        }
+
+        // ============ ACTIONS ============
+        function recordPayment() {
+            const parentId = parseInt(document.getElementById('paymentParentSelect').value);
+            const amount = parseInt(document.getElementById('paymentAmount').value);
+            
+            if (!parentId || !amount) {
+                showToast('Error', 'Please select a parent and enter an amount.', 'error');
+                return;
+            }
+            
+            const parent = parents.find(p => p.id === parentId);
+            if (parent) {
+                parent.paid += amount;
+                parent.owing = Math.max(0, parent.owing - amount);
+                parent.lastPayment = new Date().toLocaleDateString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' });
+                if (parent.owing === 0) parent.status = 'paid';
+                else if (parent.paid > 0) parent.status = 'partial';
+                
+                renderPayments();
+                renderDashboard();
+                renderParents();
+                closeModal('recordPaymentModal');
+                showToast('Payment Recorded', `R${amount} received from ${parent.name}.`, 'success');
+            }
+        }
+
+        function addScholar() {
+            const firstName = document.getElementById('scholarFirstName').value;
+            const surname = document.getElementById('scholarSurname').value;
+            
+            if (!firstName || !surname) {
+                showToast('Error', 'Please fill in all required fields.', 'error');
+                return;
+            }
+            
+            const newScholar = {
+                id: scholars.length + 1,
+                name: `${firstName} ${surname}`,
+                school: document.getElementById('scholarSchool').value || 'Soweto Primary',
+                grade: document.getElementById('scholarGrade').value,
+                age: parseInt(document.getElementById('scholarAge').value) || 10,
+                parentId: 1,
+                address: document.getElementById('scholarAddress').value || 'Soweto',
+                pickup: '06:30'
+            };
+            
+            scholars.push(newScholar);
+            renderScholars();
+            closeModal('addScholarModal');
+            showToast('Scholar Added', `${newScholar.name} has been registered.`, 'success');
+        }
+
+        function addParent() {
+            const name = document.getElementById('parentName').value;
+            if (!name) {
+                showToast('Error', 'Please enter parent name.', 'error');
+                return;
+            }
+            
+            const newParent = {
+                id: parents.length + 1,
+                name: name,
+                phone: document.getElementById('parentPhone').value || '072 000 0000',
+                email: document.getElementById('parentEmail').value || '',
+                address: document.getElementById('parentAddress').value || 'Soweto',
+                paid: 0,
+                owing: 900,
+                status: 'owing',
+                lastPayment: '—'
+            };
+            
+            parents.push(newParent);
+            renderParents();
+            renderPayments();
+            populatePaymentParentSelect();
+            closeModal('addParentModal');
+            showToast('Parent Added', `${name} has been added.`, 'success');
+        }
+
+        function sendReminders() {
+            const owing = parents.filter(p => p.owing > 0);
+            showToast('Reminders Sent', `Payment reminders sent to ${owing.length} parents via WhatsApp.`, 'success');
+        }
+
+        function sendSingleReminder(name) {
+            showToast('Reminder Sent', `Payment reminder sent to ${name}.`, 'success');
+        }
+
+        function sendWhatsApp(phone) {
+            const cleanPhone = phone.replace(/\s/g, '').replace(/^0/, '27');
+            window.open(`https://wa.me/${cleanPhone}`, '_blank');
+        }
+
+        function shareProfile(method) {
+            if (method === 'copy') {
+                showToast('Link Copied', 'Driver profile link copied to clipboard.', 'success');
+            } else if (method === 'whatsapp') {
+                showToast('Shared', 'Profile shared via WhatsApp.', 'success');
+            } else {
+                showToast('Shared', 'Profile shared via SMS.', 'success');
+            }
+        }
+
+        // ============ NOTIFICATIONS ============
+        function showNotifications() {
+            document.getElementById('notificationPanel').classList.remove('hidden');
+        }
+
+        function closeNotifications(e) {
+            if (e.target === document.getElementById('notificationPanel')) {
+                document.getElementById('notificationPanel').classList.add('hidden');
+            }
+        }
+
+        // ============ TOAST ============
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastMessage').textContent = message;
+            
+            if (type === 'success') {
+                icon.className = 'w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400';
+                icon.innerHTML = '<i class="fas fa-check"></i>';
+            } else if (type === 'error') {
+                icon.className = 'w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-red-400';
+                icon.innerHTML = '<i class="fas fa-times"></i>';
+            }
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3500);
+        }
+    </script>
+</body>
+</html>
